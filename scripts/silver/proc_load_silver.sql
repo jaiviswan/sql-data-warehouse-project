@@ -1,3 +1,4 @@
+TRUNCATE TABLE silver.crm_cust_info
 INSERT INTO silver.crm_cust_info (cst_id, cst_key, cst_firstname, cst_lastname, cst_marital_status, cst_gndr, cst_create_date)
 Select
 cst_id,
@@ -21,7 +22,7 @@ from bronze.crm_cust_info
 )t
 WHERE flag_last = 1
 
-
+TRUNCATE TABLE silver.crm_prd_info
 insert into silver.crm_prd_info(
 	prd_id,
 	cat_id,
@@ -49,7 +50,7 @@ CAST(prd_start_dt AS DATE) as prd_start_dt,
 CAST(DATEADD(day,-1,LEAD(prd_start_dt) OVER (PARTITION BY prd_key ORDER BY prd_start_dt)) as DATE) as prd_end_dt_test
 From bronze.crm_prd_info
 
-
+TRUNCATE TABLE silver.crm_sales_details
 INSERT INTO silver.crm_sales_details(
 	sls_ord_num,
 	sls_prd_key,
@@ -89,7 +90,7 @@ CASE WHEN sls_price IS NULL OR sls_price <=0
 END AS sls_price
 From bronze.crm_sales_details
 
-
+TRUNCATE TABLE silver.erp_CUST_AZ12
 INSERT INTO silver.erp_CUST_AZ12(cid,BDATE,GEN)
 Select 
 CASE WHEN cid LIKE 'NAS%' THEN SUBSTRING(cid,4, LEN(cid))
@@ -104,7 +105,7 @@ CASE WHEN UPPER(TRIM(GEN)) IN ('F', 'Female') THEN 'Female'
 END GEN
 From bronze.erp_CUST_AZ12
 
-
+TRUNCATE TABLE silver.erp_LOC_A101
 INSERT INTO silver.erp_LOC_A101(CID,CNTRY)
 
 Select DISTINCT
@@ -115,3 +116,12 @@ CASE WHEN TRIM(CNTRY) = 'DE' THEN 'Germany'
 	 ELSE TRIM(CNTRY)
 END CNTRY
 FROM bronze.erp_LOC_A101
+
+TRUNCATE TABLE silver.erp_PX_CAT_G1V2
+INSERT INTO silver.erp_PX_CAT_G1V2(ID,CAT,SUBCAT,MAINTENANCE)
+Select 
+ID,
+CAT,
+SUBCAT,
+MAINTENANCE
+From bronze.erp_PX_CAT_G1V2
