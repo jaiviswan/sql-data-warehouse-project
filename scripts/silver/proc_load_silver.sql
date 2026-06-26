@@ -1,3 +1,17 @@
+CREATE OR ALTER PROCEDURE silver.load_silver as
+BEGIN
+DECLARE @start_time DATETIME, @end_time DATETIME, @batch_start_time DATETIME, @batch_end_time DATETIME;
+	BEGIN TRY
+			SET @batch_start_time = GETDATE();
+			PRINT '========================================================================='
+			PRINT 'Loading Silver Layer Tables';
+			PRINT '========================================================================='
+
+			PRINT'--------------------------------------------------------------------------'
+			PRINT 'Loading CRM Tables';
+			PRINT'--------------------------------------------------------------------------'
+
+			SET @start_time = GETDATE();
 TRUNCATE TABLE silver.crm_cust_info
 INSERT INTO silver.crm_cust_info (cst_id, cst_key, cst_firstname, cst_lastname, cst_marital_status, cst_gndr, cst_create_date)
 Select
@@ -90,6 +104,10 @@ CASE WHEN sls_price IS NULL OR sls_price <=0
 END AS sls_price
 From bronze.crm_sales_details
 
+			PRINT'--------------------------------------------------------------------------'
+			PRINT 'Loading ERP Tables';
+			PRINT'--------------------------------------------------------------------------'
+
 TRUNCATE TABLE silver.erp_CUST_AZ12
 INSERT INTO silver.erp_CUST_AZ12(cid,BDATE,GEN)
 Select 
@@ -125,3 +143,21 @@ CAT,
 SUBCAT,
 MAINTENANCE
 From bronze.erp_PX_CAT_G1V2
+				
+				SET @end_time = GETDATE();
+				PRINT '>>Time taken: ' + CAST(DATEDIFF(SECOND, @start_time, @end_time) AS NVARCHAR(10)) + ' seconds';
+				
+				SET @batch_end_time = GETDATE();
+				PRINT'===================================================================='
+				PRINT'Batch Completed at:' + CAST(DATEDIFF(SECOND,@batch_start_time, @batch_end_time) as NVARCHAR) + ' seconds';
+				PRINT'===================================================================='
+	
+	END TRY
+BEGIN CATCH
+	PRINT '========================================================================='
+	PRINT 'Error occurred while loading Silver Layer Tables';
+	PRINT 'Error message: ' + ERROR_MESSAGE();
+	PRINT 'Error Number: ' + CAST(ERROR_NUMBER() AS NVARCHAR(10));
+	PRINT '========================================================================='
+END CATCH
+END
