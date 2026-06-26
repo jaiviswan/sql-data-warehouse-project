@@ -88,3 +88,18 @@ CASE WHEN sls_price IS NULL OR sls_price <=0
 	 ELSE sls_price
 END AS sls_price
 From bronze.crm_sales_details
+
+
+INSERT INTO silver.erp_CUST_AZ12(cid,BDATE,GEN)
+Select 
+CASE WHEN cid LIKE 'NAS%' THEN SUBSTRING(cid,4, LEN(cid))
+	ELSE cid
+END cid,
+CASE WHEN BDATE > GETDATE() THEN NULL
+	ELSE BDATE
+END BDATE,
+CASE WHEN UPPER(TRIM(GEN)) IN ('F', 'Female') THEN 'Female'
+	 WHEN UPPER(TRIM(GEN)) IN ('M', 'Male') THEN 'Male'
+	 ELSE 'n/a'
+END GEN
+From bronze.erp_CUST_AZ12
