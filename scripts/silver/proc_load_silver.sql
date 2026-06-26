@@ -103,3 +103,15 @@ CASE WHEN UPPER(TRIM(GEN)) IN ('F', 'Female') THEN 'Female'
 	 ELSE 'n/a'
 END GEN
 From bronze.erp_CUST_AZ12
+
+
+INSERT INTO silver.erp_LOC_A101(CID,CNTRY)
+
+Select DISTINCT
+REPLACE(CID,'-', '') cid,
+CASE WHEN TRIM(CNTRY) = 'DE' THEN 'Germany'
+	 WHEN TRIM(CNTRY) IN ('USA','US') THEN 'United States'
+	 WHEN TRIM(CNTRY) = '' OR CNTRY IS NULL THEN 'n/a'
+	 ELSE TRIM(CNTRY)
+END CNTRY
+FROM bronze.erp_LOC_A101
