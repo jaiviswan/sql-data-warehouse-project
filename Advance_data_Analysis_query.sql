@@ -52,3 +52,21 @@ CASE WHEN Current_sales - LAG(Current_sales) OVER (PARTITION BY product_name ORD
 END PY_Positions
 from Yearly_product_sales
 ORDER BY product_name, Order_Year
+
+-- Which categories contributes the most to overall sales?
+WITH Category_sales as (
+select
+p.category,
+SUM(f.sales_amount) as Total_sales
+from gold.fact_sales f
+LEFT JOIN gold.dim_product p
+ON p.product_key = f.product_key
+GROUP BY p.category
+)
+Select 
+category,
+Total_sales,
+SUM(Total_sales) OVER() as Overall_Sales,
+CONCAT(ROUND((CAST(Total_sales as FLOAT)/SUM(Total_sales) OVER())*100,2),'%') as Percentage_of_Total_Sales
+from category_sales
+ORDER BY Total_sales DESC
