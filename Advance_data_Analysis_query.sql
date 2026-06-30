@@ -91,3 +91,31 @@ from product_segment
 GROUP BY cost_range
 ORDER BY Total_Product DESC
 
+-- Calculate the customer spending based on 12 months Orders and sales
+with Customer_spending as
+(
+Select 
+c.customer_key,
+sum(f.sales_amount) as Total_Spending,
+MIN(order_date) as first_order,
+MAX(order_date) as last_order,
+DATEDIFF(MONTH,MIN(order_date), MAX(order_date)) as Life_Span
+From gold.fact_sales f
+LEFT JOIN gold.dim_customers c
+ON c.customer_key = f.customer_id
+WHERE customer_key IS NOT NULL
+GROUP BY c.customer_key
+)
+select
+Customer_segment,
+COUNT(customer_key) Total_customers
+From (
+Select 
+customer_key,
+CASE WHEN Life_Span >=12 AND Total_Spending >5000 THEN 'VIP'
+	 WHEN Life_Span >=12 AND Total_Spending <5000 THEN 'Regular'
+	 ELSE 'New'
+END Customer_segment
+From customer_spending)t
+GROUP BY Customer_segment
+ORDER BY Total_customers DESC
