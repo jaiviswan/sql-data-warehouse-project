@@ -70,3 +70,24 @@ SUM(Total_sales) OVER() as Overall_Sales,
 CONCAT(ROUND((CAST(Total_sales as FLOAT)/SUM(Total_sales) OVER())*100,2),'%') as Percentage_of_Total_Sales
 from category_sales
 ORDER BY Total_sales DESC
+
+/*Segment based on cost Range using Case statment and CTE*/
+WITH product_segment as (
+select 
+product_key,
+product_name,
+cost,
+CASE WHEN cost < 100 then 'Below 100'
+	 WHEN cost BETWEEN 100 and 500 then '100-500'
+	 WHEN cost BETWEEN 500 and 1000 then '500-1000'
+	 ELSE 'Above 1000'
+END cost_range
+from gold.dim_product
+)
+select 
+cost_range,
+COUNT(Product_key) as Total_Product
+from product_segment
+GROUP BY cost_range
+ORDER BY Total_Product DESC
+
